@@ -38,10 +38,10 @@ CREATE TABLE timed_mailbox (
 );
 CREATE INDEX timed_mailbox_customer ON timed_mailbox(customer_id);
 CREATE TRIGGER timed_mailbox_quota BEFORE INSERT ON timed_mailbox BEGIN
- SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM timed_customer WHERE id=NEW.customer_id
- AND expires_at > NEW.created_at AND remaining > 0) THEN RAISE(ABORT,'Mailbox quota or time exhausted') END;
- SELECT CASE WHEN EXISTS (SELECT 1 FROM timed_address_history WHERE email=NEW.email COLLATE NOCASE)
- THEN RAISE(ABORT,'Address previously used') END;
+ SELECT RAISE(ABORT,'Mailbox quota or time exhausted') WHERE NOT EXISTS
+ (SELECT 1 FROM timed_customer WHERE id=NEW.customer_id AND expires_at > NEW.created_at AND remaining > 0);
+ SELECT RAISE(ABORT,'Address previously used') WHERE EXISTS
+ (SELECT 1 FROM timed_address_history WHERE email=NEW.email COLLATE NOCASE);
 END;
 CREATE TRIGGER timed_mailbox_consume AFTER INSERT ON timed_mailbox BEGIN
  INSERT INTO timed_address_history VALUES(NEW.email);
