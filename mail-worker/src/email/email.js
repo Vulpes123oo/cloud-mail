@@ -1,4 +1,5 @@
 import PostalMime from 'postal-mime';
+import { receiveTimed } from '../timed/receive.mjs';
 import emailService from '../service/email-service';
 import accountService from '../service/account-service';
 import settingService from '../service/setting-service';
@@ -14,6 +15,7 @@ import aiService from '../service/ai-service';
 import webhookService from '../service/webhook-service';
 
 export async function email(message, env, ctx) {
+	if (await receiveTimed(message, env)) return;
 
 	try {
 
