@@ -19,7 +19,7 @@
 
 1. 在 GitHub 仓库 Actions Variables 中设置 `TIMED_MAIL_ENABLED=true` 和 `TIMED_MAIL_DOMAIN=getvulpe.com`（必须是现有 Email Routing 已接入此 Worker 的收件域名）。
 2. 合并代码到 main。现有部署 workflow 会先运行测试，再通过 D1 migrations 建表，然后部署 Worker 和页面。数据库已有正常初始化的 `account` 表是前提。
-3. 若使用 Cloudflare Git 自动构建而不是 GitHub Actions，先对正确数据库运行 `pnpm wrangler d1 migrations apply db --remote -c <实际配置文件>`，成功后在 Worker 设置同名变量，并部署此版本。不要直接执行仓库默认 `pnpm test`，它是旧测试环境部署命令。
+3. 本仓库当前使用 Cloudflare Git 自动构建，生产部署命令设置为 `pnpm run deploy`。它先运行测试、执行 D1 migrations，再发布 Worker；`wrangler.toml` 已配置 getvulpe.com 和现有 cloudmail 数据库、KV、R2 绑定。不要直接执行仓库默认 `pnpm test`，它是旧测试环境部署命令。
 4. 打开 `/timed/admin.html`，用现有 `env.admin` 对应账号登录，生成卡密并保存文本文件。数据库仅存 SHA-256 摘要，卡密原文无法找回。
 5. 在客户入口使用卡密注册，创建邮箱，用外部真实邮箱发送测试邮件，确认收件。测试不会自动对外发送邮件。
 

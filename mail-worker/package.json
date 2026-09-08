@@ -6,7 +6,7 @@
 		"test:timed": "node --test test/timed.test.mjs",
 		"dev": "wrangler dev --config wrangler-dev.toml",
 		"test": "wrangler deploy --config wrangler-test.toml",
-		"deploy": "wrangler deploy",
+		"deploy": "pnpm run test:timed && wrangler d1 migrations apply db --remote && wrangler deploy",
 		"start": "wrangler dev"
 	},
 	"devDependencies": {
