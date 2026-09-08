@@ -28,6 +28,8 @@ jobs:
       AI_MODEL: ${{ secrets.AI_MODEL || vars.AI_MODEL || '@cf/meta/llama-3.1-8b-instruct-fast' }}
       CLOUDFLARE_EMAIL: ${{ secrets.CF_EMAIL || vars.CF_EMAIL || false }}
       ANALYSIS_CACHE: ${{ secrets.ANALYSIS_CACHE || vars.ANALYSIS_CACHE || false }}
+      TIMED_MAIL_ENABLED: ${{ vars.TIMED_MAIL_ENABLED || 'false' }}
+      TIMED_MAIL_DOMAIN: ${{ vars.TIMED_MAIL_DOMAIN || '' }}
 
 
     outputs:
@@ -94,6 +96,14 @@ jobs:
           fi
           
           CONFIG_FILE="wrangler-action.toml"
+          if [ "$TIMED_MAIL_ENABLED" != "true" ] && [ "$TIMED_MAIL_ENABLED" != "false" ]; then
+            echo "Invalid TIMED_MAIL_ENABLED"; exit 1
+          fi
+          if [ "$TIMED_MAIL_ENABLED" = "true" ] && ! [[ "$TIMED_MAIL_DOMAIN" =~ ^[a-z0-9.-]+\.[a-z]+$ ]]; then
+            echo "Set TIMED_MAIL_DOMAIN to a configured receiving domain"; exit 1
+          fi
+          sed -i "s|\${TIMED_MAIL_ENABLED}|${TIMED_MAIL_ENABLED}|g" "$CONFIG_FILE"
+          sed -i "s|\${TIMED_MAIL_DOMAIN}|${TIMED_MAIL_DOMAIN}|g" "$CONFIG_FILE"
           
           if [ -z "$R2_BUCKET_NAME" ]; then
             sed -i '/\[\[r2_buckets\]\]/,/^$/d' "$CONFIG_FILE"
@@ -205,6 +215,15 @@ jobs:
           
           sed -i "s|\${D1_DATABASE_ID}|$D1_ID|g" "$CONFIG_FILE"
           echo "✅ Setup completed."
+
+      - name: Test private timed mailboxes
+        working-directory: ./mail-worker
+        run: pnpm run test:timed
+
+      - name: Migrate private timed mailboxes
+        if: env.TIMED_MAIL_ENABLED == 'true'
+        working-directory: ./mail-worker
+        run: pnpm wrangler d1 migrations apply db --remote -c wrangler-action.toml
 
       - name: 🚀 开始部署 / Start deployment
         id: deploy

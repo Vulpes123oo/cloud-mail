@@ -12,10 +12,6 @@ export default {
 
 		const url = new URL(req.url)
 		if (url.pathname.startsWith('/api/timed/')) return timedApi(req, env);
-		if (url.pathname === '/timed' || url.pathname === '/timed/') {
-			url.pathname = '/timed/index.html';
-			return env.assets.fetch(new Request(url, req));
-		}
 
 		if (url.pathname.startsWith('/api/')) {
 			url.pathname = url.pathname.replace('/api', '')

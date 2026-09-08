@@ -36,6 +36,8 @@ crons = ["0 * * * *"]	#每小时执行；resetDaySendCount 仅在 UTC 0 点生�
 
 
 [vars]
+TIMED_MAIL_ENABLED = "${TIMED_MAIL_ENABLED}"
+TIMED_MAIL_DOMAIN = "${TIMED_MAIL_DOMAIN}"
 ai_model = "${AI_MODEL}"
 analysis_cache = "${ANALYSIS_CACHE}"
 #orm_log = false
